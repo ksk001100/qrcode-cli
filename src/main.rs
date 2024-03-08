@@ -1,6 +1,6 @@
 use image::Luma;
 use qrcode::QrCode;
-use seahorse::{App, Command};
+use seahorse::{App, Command, Flag, FlagType};
 use std::env;
 
 fn main() {
@@ -22,15 +22,16 @@ fn encode_command() -> Command {
         .description("Encode a string")
         .usage("qr encode [args]")
         .alias("e")
+        .flag(Flag::new("output", FlagType::String).alias("o").description("Output filename"))
         .action(|c| {
             let text = c.args[0].clone();
-            let filename = match c.args.get(1) {
-                Some(filename) => filename,
-                None => "qrcode.png",
-            };
+            let filename = c.string_flag("output").unwrap_or("qr.png".to_string());
             let code = QrCode::new(text).unwrap();
             let image = code.render::<Luma<u8>>().build();
-            image.save(filename).unwrap();
+            match image.save(filename) {
+                Ok(_) => println!("QR code saved to {}", filename),
+                Err(e) => println!("Error saving QR code: {}", e),
+            }
         })
 }
 
@@ -41,7 +42,13 @@ fn decode_command() -> Command {
         .alias("d")
         .action(|c| {
             let filename = c.args[0].clone();
-            let img = image::open(filename).unwrap();
+            let img = match image::open(filename) {
+                Ok(img) => img,
+                Err(e) => {
+                    println!("Error opening image: {}", e);
+                    std::process::exit(1);
+                }
+            };
             let decoder = bardecoder::default_decoder();
             let results = decoder.decode(&img);
             for result in results {
