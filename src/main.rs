@@ -22,14 +22,18 @@ fn encode_command() -> Command {
         .description("Encode a string")
         .usage("qr encode [args]")
         .alias("e")
-        .flag(Flag::new("output", FlagType::String).alias("o").description("Output filename"))
+        .flag(
+            Flag::new("output", FlagType::String)
+                .alias("o")
+                .description("Output filename"),
+        )
         .action(|c| {
             let text = c.args[0].clone();
             let filename = c.string_flag("output").unwrap_or("qr.png".to_string());
             let code = QrCode::new(text).unwrap();
             let image = code.render::<Luma<u8>>().build();
-            match image.save(filename) {
-                Ok(_) => println!("QR code saved to {}", filename),
+            match image.save(&filename) {
+                Ok(_) => println!("QR code saved to {}", &filename),
                 Err(e) => println!("Error saving QR code: {}", e),
             }
         })
