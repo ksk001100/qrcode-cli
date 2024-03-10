@@ -5,11 +5,11 @@ use std::env;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let app = App::new(env!("CARGO_PKG_NAME"))
+    let app = App::new("qr")
         .description(env!("CARGO_PKG_DESCRIPTION"))
         .author(env!("CARGO_PKG_AUTHORS"))
         .version(env!("CARGO_PKG_VERSION"))
-        .usage(format!("{} [args]", env!("CARGO_PKG_NAME")))
+        .usage("qr [subcommand] [args]")
         .action(|c| c.help())
         .command(encode_command())
         .command(decode_command());
